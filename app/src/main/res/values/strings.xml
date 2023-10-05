@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">QuickScan Pro</string>
 
-    <string name="camera_buttom">"Scan"</string>
+    <string name="camera_button">"Scan"</string>
     <string name="result_title_label">Result:</string>
     <string name="info_label">Scan acceptable QR codes:\n
         - WiFi\n
@@ -10,5 +10,16 @@
         - URL\n
         Otherwise, the app will display the barcode number.
     </string>
+    <string name="email_details">Email Details\n\nEmail: %1$s\nSubject: %2$s\nBody: %3$s</string>
+    <string name="vcard_details">VCard Details\n\nTitle: %1$s\nOrganization: %2$s\nName: %3$s\nPhone: %4$s</string>
+    <string name="url_details">URL Details\n\nTitle: %1$s\nUrl: %2$s</string>
+    <string name="wifi_network_details">Wi-Fi Network Details\n\nSSID: %1$s\nPassword: %2$s\nEncryptionType: %3$s</string>
+    <string name="raw_value">Raw Value: %1$s</string>
+
+
+    <string name="no_qr_code_detected">No QR code was detected. Please take the image again.</string>
+    <string name="failed_scanning_message">Failed scanning due to %1$s</string>
+    <string name="camera_capture_failed">Camera capture failed</string>
+    <string name="camera_permission_required">Camera permission is required</string>
 
 </resources>

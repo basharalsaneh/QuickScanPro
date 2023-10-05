@@ -7,74 +7,107 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/info_label"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/info_label"
-        android:textAlignment="center"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="18sp"
+        android:padding="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/infoLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/info_label"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp" />
+    </androidx.cardview.widget.CardView>
 
     <Button
         android:id="@+id/cameraButton"
         style="@style/Widget.AppCompat.Button"
-        android:layout_width="192dp"
+        android:layout_width="wrap_content"
         android:layout_height="72dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/button_background"
         android:paddingStart="32dp"
         android:paddingTop="16dp"
         android:paddingEnd="32dp"
         android:paddingBottom="16dp"
-        android:text="@string/camera_buttom"
+        android:text="@string/camera_button"
         android:textColor="@android:color/white"
-        android:textSize="24sp"
+        android:textSize="26sp"
         android:textStyle="bold"
         app:icon="@drawable/baseline_qr_code_scanner_24"
-        app:iconSize="24dp"
+        app:iconSize="26dp"
         app:iconTint="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/info_label" />
+        app:layout_constraintTop_toBottomOf="@+id/cardView" />
 
-    <FrameLayout
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cameraButton" />
+
+    <ImageView
+        android:id="@+id/qrImageView"
+        android:layout_width="324dp"
+        android:layout_height="315dp"
+        android:layout_marginTop="36dp"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cameraButton"
+        app:srcCompat="@drawable/qr_code_example" />
+
+    <!-- Result Label -->
+    <TextView
+        android:id="@+id/resultTitleLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:text="@string/result_title_label"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+    <!-- FrameLayout for Result -->
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_marginTop="16dp"
         android:background="@color/colorAccent"
         android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resultTitleLabel">
 
-        <TextView
-            android:id="@+id/resultTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:layout_marginTop="8dp"/>
-
-    </FrameLayout>
-
     <TextView
-        android:id="@+id/resultTitleLabel"
+        android:id="@+id/resultTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="46dp"
-        android:text="@string/result_title_label"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cameraButton" />
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+</FrameLayout>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>

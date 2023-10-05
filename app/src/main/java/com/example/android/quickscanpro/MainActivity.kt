@@ -1,14 +1,12 @@
 package com.example.android.quickscanpro
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.android.quickscanpro.databinding.ActivityMainBinding
-import com.google.android.material.button.MaterialButton
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -25,24 +22,20 @@ import com.google.mlkit.vision.common.InputImage
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var cameraButton: MaterialButton
     private lateinit var resultTextView: TextView
-
-    companion object {
-        private const val CAMERA_PERMISSION_CODE = 100
-        private const val TAG = "MainActivity"
-    }
-
     private lateinit var cameraPermission: Array<String>
     private var barcodeScannerOptions: BarcodeScannerOptions? = null
     private var barcodeScanner: BarcodeScanner? = null
+    companion object {
+        private const val CAMERA_PERMISSION_CODE = 100
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        cameraButton = binding.cameraButton.findViewById(R.id.cameraButton)
         resultTextView = binding.resultTextView
 
         cameraPermission = arrayOf(Manifest.permission.CAMERA)
@@ -51,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS).build()
         barcodeScanner = BarcodeScanning.getClient(barcodeScannerOptions!!)
 
-        cameraButton.setOnClickListener {
+        binding.cameraButton.setOnClickListener {
             if (checkCameraPermission()) {
                 openCamera()
             } else {
@@ -59,90 +52,87 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun detectBarcodeFromImage(imageBitmap: Bitmap) {
-        try {
-            val inputImage = InputImage.fromBitmap(imageBitmap, 0)
-            val barcodeResult = barcodeScanner!!.process(inputImage)
-                .addOnSuccessListener { barcodes ->
-                    extractBarcodeInformation(barcodes)
-                }.addOnFailureListener { e ->
-                    Log.e(TAG, "Barcode detection failed: ${e.message}")
-                    showToast("Failed scanning due to ${e.message}")
-                }
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception occurred during barcode detection: ${e.message}")
-            showToast("Failed scanning due to ${e.message}")
-        }
-    }
-
-    private fun extractBarcodeInformation(barcodes: List<Barcode>) {
-        for (barcode in barcodes) {
-            val rawValue = barcode.rawValue
-            Log.d(TAG, "Raw Value: $rawValue")
-
-            if (barcode.valueType == Barcode.TYPE_WIFI) {
-                val typeWifi = barcode.wifi
-                val ssid = "${typeWifi?.ssid}"
-                val password = "${typeWifi?.password}"
-                var encryptionType = "${typeWifi?.encryptionType}"
-
-                if (encryptionType == "1") {
-                    encryptionType = "OPEN"
-                } else if (encryptionType == "2") {
-                    encryptionType = "WPA"
-                } else if (encryptionType == "3") {
-                    encryptionType = "WEP"
-                }
-
-
-                resultTextView.text = "TYPE_WIFI \n\nSSID: $ssid \nPassword: $password \nEncryptionType: $encryptionType"
-            } else if (barcode.valueType == Barcode.TYPE_URL) {
-                val typeUrl = barcode.url
-                val title = "${typeUrl?.title}"
-                val url = "${typeUrl?.url}"
-
-                resultTextView.text = "TYPE_URL \n\nTitle: $title \nUrl: $url "
-            } else if (barcode.valueType == Barcode.TYPE_EMAIL) {
-                val typeEmail = barcode.email
-                val address = "${typeEmail?.address}"
-                val body = "${typeEmail?.body}"
-                val subject = "${typeEmail?.subject}"
-
-
-                resultTextView.text = "TYPE_EMAIL \n\nEmail: $address\nSubject: $subject\nBody: $body"
-            } else if (barcode.valueType == Barcode.TYPE_CONTACT_INFO) {
-                val typeContact = barcode.contactInfo
-                val title = "${typeContact?.title}"
-                val organization = "${typeContact?.organization}"
-                val name = "${typeContact?.name?.first} ${typeContact?.name?.last}"
-                val phone = "${typeContact?.name?.first} ${typeContact?.phones?.get(0)?.number}"
-
-
-                resultTextView.text = "TYPE_CONTACT_INFO \n\nTitle: $title \nOrganization: $organization \nName: $name \nPhone: $phone "
-            } else {
-                resultTextView.text = "Raw Value: $rawValue"
-            }
-        }
-    }
-
     private fun openCamera() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraActivityResultLauncher.launch(intent)
     }
 
-    private val cameraActivityResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val cameraActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
                 val imageBitmap = data?.extras?.get("data") as Bitmap
                 detectBarcodeFromImage(imageBitmap)
             } else {
-                showToast("Camera capture failed")
+                showToast(getString(R.string.camera_capture_failed))
             }
+    }
+    private fun detectBarcodeFromImage(imageBitmap: Bitmap) {
+        try {
+            val inputImage = InputImage.fromBitmap(imageBitmap, 0)
+            barcodeScanner!!.process(inputImage)
+                .addOnSuccessListener { barcodes ->
+                    if (barcodes.isEmpty()) {
+                        showToast(getString(R.string.no_qr_code_detected))
+                    } else {
+                        extractBarcodeInformation(barcodes)
+                        binding.qrImageView.visibility = View.GONE
+                        binding.frameLayout.visibility = View.VISIBLE
+                        binding.resultTitleLabel.visibility = View.VISIBLE
+                    }
+                }
+                .addOnFailureListener { e ->
+                    showToast(getString(R.string.failed_scanning_message, e.message))
+                }
+        } catch (e: Exception) {
+            showToast(getString(R.string.failed_scanning_message, e.message))
         }
+    }
+    private fun extractBarcodeInformation(barcodes: List<Barcode>) {
+        for (barcode in barcodes) {
+            when (barcode.valueType) {
+                Barcode.TYPE_WIFI -> {
+                    val typeWifi = barcode.wifi
+                    val ssid = "${typeWifi?.ssid}"
+                    val password = "${typeWifi?.password}"
+                    var encryptionType = "${typeWifi?.encryptionType}"
 
+                    encryptionType = when (encryptionType) {
+                        "1" -> "OPEN"
+                        "2" -> "WPA"
+                        "3" -> "WEP"
+                        else -> encryptionType
+                    }
 
+                    resultTextView.text = getString(R.string.wifi_network_details, ssid, password, encryptionType)
+                }
+                Barcode.TYPE_URL -> {
+                    val typeUrl = barcode.url
+                    val title = "${typeUrl?.title}"
+                    val url = "${typeUrl?.url}"
+                    resultTextView.text = getString(R.string.url_details, title, url)
+                }
+                Barcode.TYPE_EMAIL -> {
+                    val typeEmail = barcode.email
+                    val address = "${typeEmail?.address}"
+                    val body = "${typeEmail?.body}"
+                    val subject = "${typeEmail?.subject}"
+                    resultTextView.text = getString(R.string.email_details, address, subject, body)
+                }
+                Barcode.TYPE_CONTACT_INFO -> {
+                    val typeContact = barcode.contactInfo
+                    val title = "${typeContact?.title}"
+                    val organization = "${typeContact?.organization}"
+                    val name = "${typeContact?.name?.first} ${typeContact?.name?.last}"
+                    val phone = "${typeContact?.name?.first} ${typeContact?.phones?.getOrNull(0)?.number ?: ""}"
+                    resultTextView.text = getString(R.string.vcard_details, title, organization, name, phone)
+                }
+                else -> {
+                    resultTextView.text = getString(R.string.raw_value, barcode.rawValue ?: "")
+                }
+            }
+
+        }
+    }
     private fun checkCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
@@ -164,7 +154,7 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 openCamera()
             } else {
-                showToast("Camera permission is required")
+                showToast(getString(R.string.camera_permission_required))
             }
         }
     }
