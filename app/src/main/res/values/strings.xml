@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">QuickScan Pro</string>
+
+    <string name="camera_buttom">"Scan"</string>
+    <string name="result_title_label">Result:</string>
+    <string name="info_label">Scan acceptable QR codes:\n
+        - WiFi\n
+        - vCard\n
+        - Email\n
+        - URL\n
+        Otherwise, the app will display the barcode number.
+    </string>
+
+</resources>
