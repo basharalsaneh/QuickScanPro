@@ -4,8 +4,13 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -125,9 +130,27 @@ class MainActivity : AppCompatActivity() {
                     val name = "${typeContact?.name?.first} ${typeContact?.name?.last}"
                     val phone = "${typeContact?.name?.first} ${typeContact?.phones?.getOrNull(0)?.number ?: ""}"
                     resultTextView.text = getString(R.string.vcard_details, title, organization, name, phone)
-                }
-                else -> {
-                    resultTextView.text = getString(R.string.raw_value, barcode.rawValue ?: "")
+                } else -> {
+                    val rawValue = barcode.rawValue ?: ""
+                    val formattedText = if (rawValue.isNotBlank()) {
+                        getString(R.string.raw_value, rawValue)
+                    } else {
+                        getString(R.string.raw_value_empty)
+                    }
+
+                    val startIndex = formattedText.indexOf(rawValue)
+                    val spannableString = SpannableString(formattedText)
+                    val clickableSpan = object : ClickableSpan() {
+                        override fun onClick(widget: View) {
+                            val googleSearchUrl = "https://www.google.com/search?q=$rawValue"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(googleSearchUrl))
+                            startActivity(intent)
+                        }
+                    }
+
+                    spannableString.setSpan(clickableSpan, startIndex, startIndex + rawValue.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    resultTextView.text = spannableString
+                    resultTextView.movementMethod = LinkMovementMethod.getInstance()
                 }
             }
 
